@@ -1,5 +1,6 @@
 from ultralytics import YOLO
-import matplotlib_inline as plt
+import pandas as pandas
+import matplotlib.pyplot as plt
 import numpy as np
 
 # Load a model
@@ -12,5 +13,9 @@ model = YOLO("yolov8s.pt")  # load a pretrained model (recommended for training)
 results = model("./bus.jpg")  # predict on an image
 # path = model.export(format="onnx")  # export the model to ONNX format
 
-plt.imshow(np.squeeze(results.render()))
-plt.show()
+print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
+print(results.boxes)  # print results
+print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
+
+# plt.imshow(np.squeeze(results.plot()))
+# plt.show()
