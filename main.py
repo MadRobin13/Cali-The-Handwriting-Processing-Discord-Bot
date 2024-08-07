@@ -1,21 +1,33 @@
 from ultralytics import YOLO
-import pandas as pandas
-import matplotlib.pyplot as plt
-import numpy as np
+import discord
+import dotenv
+import os
 
-# Load a model
-# model = YOLO("yolov8n.yaml")  # build a new model from scratch
 model = YOLO("yolov8s.pt")  # load a pretrained model (recommended for training)
 
-# Use the model
-# model.train(data="coco8.yaml", epochs=3)  # train the model
-# metrics = model.val()  # evaluate model performance on the validation set
-results = model("./bus.jpg")  # predict on an image
-# path = model.export(format="onnx")  # export the model to ONNX format
 
-print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
-print(results.boxes)  # print results
-print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
+intents = discord.Intents.default()
+intents.message_content = True
+client = discord.Client(intents=intents)
 
-# plt.imshow(np.squeeze(results.plot()))
-# plt.show()
+async def main():
+    dotenv.load_dotenv();
+    await client.run(os.getenv("TOKEN"));
+
+main()
+
+@client.event
+
+async def on_ready():
+    print(f'We have logged in as {client.user}')
+
+@client.event
+async def on_message(message):
+    if message.author == client.user:
+        return
+
+    if message.attachments:
+        for attachment in message.attachments:
+            await attachment.save(attachment.filename)
+            results = model(attachment.filename)
+            message.channel.send(results)
