@@ -2,8 +2,9 @@ from ultralytics import YOLO
 import discord
 from dotenv import load_dotenv
 import os
+import PIL
 
-model = YOLO("yolov8s.pt")  # load a pretrained model (recommended for training)
+model = YOLO("yolov8s.pt") 
 
 
 intents = discord.Intents.default()
@@ -19,30 +20,30 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    if message.author == client.user:
+    if message.author.bot:
         return
+    if message.content == "ping":
+        await message.channel.send("pong")
 
     if message.attachments:
         for attachment in message.attachments:
 
-            await attachment.save(attachment.filename)
-            result = model(attachment.filename)
+            img_path = os.path.join("./images", attachment.filename)
+            await attachment.save(img_path)
 
-            # testing stuff
-
-            boxes = result.boxes  # Boxes object for bounding box outputs
-            masks = result.masks  # Masks object for segmentation masks outputs
-            keypoints = result.keypoints  # Keypoints object for pose outputs
-            probs = result.probs  # Probs object for classification outputs
-            obb = result.obb  # Oriented boxes object for OBB outputs
-            result.show()  # display to screen
-            result.save(filename="result.jpg")  # save to disk
-
-            ###############
-
-
+            result = model(img_path, save=True)
             print(result)
-            await message.channel.send(result.plot())
+
+            # result_img_path = img_path.replace(".jpg", "_result.jpg")
+            # result[0].plot(save=True, path=result_img_path)
+
+            result_img_path = os.path.join("runs\detect\predict", attachment.filename)
+
+            with open(result_img_path) as f:
+                send_img = discord.File(f)
+                await message.channel.send(file=send_img)
+
+            os.remove(result_img_path)
 
 def main():
     client.run(os.getenv("TOKEN"));
