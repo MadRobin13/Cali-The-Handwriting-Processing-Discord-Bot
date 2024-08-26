@@ -1,3 +1,4 @@
+import asyncio
 from ultralytics import YOLO
 import discord
 from dotenv import load_dotenv
@@ -22,8 +23,6 @@ async def on_ready():
 async def on_message(message):
     if message.author.bot:
         return
-    if message.content == "ping":
-        await message.channel.send("pong")
 
     if message.attachments:
         for attachment in message.attachments:
@@ -31,19 +30,20 @@ async def on_message(message):
             img_path = os.path.join("./images", attachment.filename)
             await attachment.save(img_path)
 
-            result = model(img_path, save=True)
-            print(result)
+            result = model(img_path, save=True, project="results", name=attachment.filename)
+
+            while not result[0]:
+                asyncio.sleep(0.5)
 
             # result_img_path = img_path.replace(".jpg", "_result.jpg")
             # result[0].plot(save=True, path=result_img_path)
 
-            result_img_path = os.path.join("runs\detect\predict", attachment.filename)
+            result_img_path = os.path.join("results\\" + attachment.filename, attachment.filename)
+            print(result_img_path)
 
-            with open(result_img_path) as f:
+            with open(result_img_path, "rb") as f:
                 send_img = discord.File(f)
                 await message.channel.send(file=send_img)
-
-            os.remove(result_img_path)
 
 def main():
     client.run(os.getenv("TOKEN"));
