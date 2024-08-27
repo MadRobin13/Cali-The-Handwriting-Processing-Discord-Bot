@@ -5,8 +5,7 @@ from dotenv import load_dotenv
 import os
 import PIL
 
-model = YOLO("yolov8s.pt") 
-
+model = YOLO("yolov8s.pt")
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -32,18 +31,18 @@ async def on_message(message):
 
             result = model(img_path, save=True, project="results", name=attachment.filename)
 
-            while not result[0]:
-                asyncio.sleep(0.5)
-
-            # result_img_path = img_path.replace(".jpg", "_result.jpg")
-            # result[0].plot(save=True, path=result_img_path)
-
             result_img_path = os.path.join("results\\" + attachment.filename, attachment.filename)
             print(result_img_path)
 
             with open(result_img_path, "rb") as f:
                 send_img = discord.File(f)
                 await message.channel.send(file=send_img)
+                # await message.channel.send(str(result[0]))
+                for det in result[0].detections:
+                    x1, y1, x2, y2 = det.box.xyxy  # Bounding box coordinates
+                    conf = det.conf  # Confidence
+                    cls = det.cls  # Detected class ID
+                    await message.channel.send(f"Coordinates: {x1}, {y1}, {x2}, {y2}, Conf: {conf}, Class: {cls}")
 
 def main():
     client.run(os.getenv("TOKEN"));
