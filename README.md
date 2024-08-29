@@ -17,3 +17,4 @@
 - Then you'll need to run [main.py](main.py) using `python ./main.py`
 
 ## License:
+It is the BSD 3-Clause "New" or "Revised" License and can be found [here](LICENSE)
